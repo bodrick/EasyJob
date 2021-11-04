@@ -1,11 +1,9 @@
-﻿using EasyJob.Utils;
-using HtmlAgilityPack;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
+using EasyJob.Utils;
+using HtmlAgilityPack;
 
 namespace EasyJob.Windows
 {
@@ -23,11 +21,26 @@ namespace EasyJob.Windows
             LoadDataInfoIntoTheForm();
         }
 
+        /// <summary>
+        /// Converts to plain text.
+        /// </summary>
+        /// <param name="html">The HTML.</param>
+        public static string ConvertToPlainText(string html)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var sw = new StringWriter();
+            ConvertTo(doc.DocumentNode, sw);
+            sw.Flush();
+            return sw.ToString();
+        }
+
         public void LoadDataInfoIntoTheForm()
         {
             AboutTitle.Content = "EasyJob Executor " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
             AboutInfo.Content = "Author: Akshin Mustafayev. Contrubutions made to the project by the Github community";
-            string readme = CommonUtils.ReadAssemblyFile("LICENSE.txt");
+            var readme = CommonUtils.ReadAssemblyFile("LICENSE.txt");
             RichTextBox1.Document.Blocks.Clear();
             var plainText = ConvertToPlainText(readme);
             RichTextBox1.AppendText(plainText);
@@ -35,31 +48,14 @@ namespace EasyJob.Windows
 
         private static void ConvertContentTo(HtmlNode node, TextWriter outText)
         {
-            foreach (HtmlNode subnode in node.ChildNodes)
+            foreach (var subnode in node.ChildNodes)
             {
                 ConvertTo(subnode, outText);
             }
         }
 
-        /// <summary>
-        /// Converts to plain text.
-        /// </summary>
-        /// <param name="html">The HTML.</param>
-        /// <returns></returns>
-        public static string ConvertToPlainText(string html)
-        {
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            StringWriter sw = new StringWriter();
-            ConvertTo(doc.DocumentNode, sw);
-            sw.Flush();
-            return sw.ToString();
-        }
-
         private static void ConvertTo(HtmlNode node, TextWriter outText)
         {
-            string html;
             switch (node.NodeType)
             {
                 case HtmlNodeType.Comment:
@@ -72,16 +68,20 @@ namespace EasyJob.Windows
 
                 case HtmlNodeType.Text:
                     // script and style must not be output
-                    string parentName = node.ParentNode.Name;
-                    if ((parentName == "script") || (parentName == "style"))
+                    var parentName = node.ParentNode.Name;
+                    if (parentName is "script" or "style")
+                    {
                         break;
+                    }
 
                     // get text
-                    html = ((HtmlTextNode)node).Text;
+                    var html = ((HtmlTextNode)node).Text;
 
                     // is it in fact a special closing node output as text?
                     if (HtmlNode.IsOverlappedClosingElement(html))
+                    {
                         break;
+                    }
 
                     // check the text is meaningful and not a bunch of whitespaces
                     if (html.Trim().Length > 0)
@@ -95,10 +95,11 @@ namespace EasyJob.Windows
                     {
                         case "p":
                             // treat paragraphs as crlf
-                            outText.Write("\r\n");
+                            outText.Write(Environment.NewLine);
                             break;
+
                         case "br":
-                            outText.Write("\r\n");
+                            outText.Write(Environment.NewLine);
                             break;
                     }
 
@@ -108,22 +109,12 @@ namespace EasyJob.Windows
                     }
                     break;
             }
-
         }
 
-        private void GetInspirationButton_Click(object sender, RoutedEventArgs e)
-        {
-            CommonUtils.OpenLinkInBrowser("https://www.youtube.com/watch?v=l0U7SxXHkPY");
-        }
+        private void CheckNewReleasesButton_Click(object sender, RoutedEventArgs e) => CommonUtils.OpenLinkInBrowser("https://github.com/akshinmustafayev/EasyJob/releases");
 
-        private void CheckNewReleasesButton_Click(object sender, RoutedEventArgs e)
-        {
-            CommonUtils.OpenLinkInBrowser("https://github.com/akshinmustafayev/EasyJob/releases");
-        }
+        private void GetInspirationButton_Click(object sender, RoutedEventArgs e) => CommonUtils.OpenLinkInBrowser("https://www.youtube.com/watch?v=l0U7SxXHkPY");
 
-        private void GithubImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            CommonUtils.OpenLinkInBrowser("https://github.com/akshinmustafayev/EasyJob");
-        }
+        private void GithubImage_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) => CommonUtils.OpenLinkInBrowser("https://github.com/akshinmustafayev/EasyJob");
     }
 }

@@ -1,6 +1,6 @@
-﻿using ModernWpf;
-using ModernWpf.Controls;
 using System.Windows;
+using ModernWpf;
+using ModernWpf.Controls;
 
 namespace EasyJobPSTools.Utils
 {

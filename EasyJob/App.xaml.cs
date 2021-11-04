@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
+using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace EasyJob
@@ -26,7 +21,10 @@ namespace EasyJob
             var menuDropAlignmentField = typeof(SystemParameters).GetField("_menuDropAlignment", BindingFlags.NonPublic | BindingFlags.Static);
             Action setAlignmentValue = () =>
             {
-                if (SystemParameters.MenuDropAlignment && menuDropAlignmentField != null) menuDropAlignmentField.SetValue(null, false);
+                if (SystemParameters.MenuDropAlignment && menuDropAlignmentField != null)
+                {
+                    menuDropAlignmentField.SetValue(null, false);
+                }
             };
 
             setAlignmentValue();

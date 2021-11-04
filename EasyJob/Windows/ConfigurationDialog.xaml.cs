@@ -1,19 +1,7 @@
-﻿using EasyJob.Serialization;
-using EasyJob.Utils;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using EasyJob.Serialization;
+using EasyJob.Utils;
 
 namespace EasyJob.Windows
 {
@@ -22,13 +10,32 @@ namespace EasyJob.Windows
     /// </summary>
     public partial class ConfigurationDialog : Window
     {
-        private Config config;
+        private readonly Config config;
 
         public ConfigurationDialog(Config _config)
         {
             InitializeComponent();
             config = _config;
             LoadConfiguration();
+        }
+
+        private bool GetComboBoxValue(ComboBox comboBox)
+        {
+            if (comboBox.SelectedIndex == 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var hd = new HelpDialog(button.Name);
+            hd.ShowDialog();
         }
 
         private void LoadConfiguration()
@@ -67,30 +74,6 @@ namespace EasyJob.Windows
             SetComboBoxFromValue(HideHelpAboutMenuItem, config.restrictions.hide_menu_item_help_about);
         }
 
-        private void SetComboBoxFromValue(ComboBox comboBox, bool value)
-        {
-            if(value == true)
-            {
-                comboBox.SelectedIndex = 0;
-            }
-            else
-            {
-                comboBox.SelectedIndex = 1;
-            }
-        }
-
-        private bool GetComboBoxValue(ComboBox comboBox)
-        {
-            if (comboBox.SelectedIndex == 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             config.default_powershell_path = DefaultPowerShellPath.Text;
@@ -124,17 +107,22 @@ namespace EasyJob.Windows
             config.restrictions.hide_menu_item_help_troubleshooting = GetComboBoxValue(HideHelpTroubleshootingMenuItem);
             config.restrictions.hide_menu_item_help_about = GetComboBoxValue(HideHelpAboutMenuItem);
 
-            if(ConfigUtils.SaveFromConfigToFile(config) == true)
+            if (ConfigUtils.SaveFromConfigToFile(config) == true)
             {
                 MessageBox.Show("Settings saved!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
-        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        private void SetComboBoxFromValue(ComboBox comboBox, bool value)
         {
-            Button button = sender as Button;
-            HelpDialog hd = new HelpDialog(button.Name);
-            hd.ShowDialog();
+            if (value == true)
+            {
+                comboBox.SelectedIndex = 0;
+            }
+            else
+            {
+                comboBox.SelectedIndex = 1;
+            }
         }
     }
 }

@@ -1,18 +1,6 @@
-﻿using EasyJob.Serialization.AnswerDialog;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using EasyJob.Serialization.AnswerDialog;
 
 namespace EasyJob.Windows
 {
@@ -22,13 +10,14 @@ namespace EasyJob.Windows
     public partial class AnswerDialog : Window
     {
         public AnswerData answerData = null;
+
         public AnswerDialog(AnswerData _answerData)
         {
             InitializeComponent();
             answerData = _answerData;
             if (_answerData != null)
             {
-                foreach (Answer answer in _answerData.Answers)
+                foreach (var answer in _answerData.Answers)
                 {
                     answer.AnswerResult = "";
                 }
@@ -36,28 +25,25 @@ namespace EasyJob.Windows
             }
         }
 
+        private void CANCELButton_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            bool AllowConfirm = true;
+            var AllowConfirm = true;
             answerData.Answers = (List<Answer>)AnswerDialogItems.ItemsSource;
-            foreach (Answer answer in answerData.Answers)
+            foreach (var answer in answerData.Answers)
             {
-                if(answer.AnswerResult == "" || answer.AnswerResult == null)
+                if (answer.AnswerResult == "" || answer.AnswerResult == null)
                 {
                     AllowConfirm = false;
                 }
             }
-            if(AllowConfirm == false)
+            if (AllowConfirm == false)
             {
                 MessageBox.Show("Please provide value to all textboxes!", "Fill all data", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             DialogResult = true;
-        }
-
-        private void CANCELButton_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
         }
     }
 }

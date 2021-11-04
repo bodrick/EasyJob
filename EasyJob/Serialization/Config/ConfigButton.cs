@@ -1,38 +1,46 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EasyJob.Serialization
 {
     public class ConfigButton
     {
-        private Guid _id;
-        private string _text;
-        private string _description;
-        private string _script;
-        private string _scriptpathtype;
-        private string _scripttype;
-        private List<ConfigArgument> _arguments;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigButton"/> class.
         /// </summary>
+        /// <param name="id"></param>
         /// <param name="text">The text.</param>
         /// <param name="description">The description.</param>
         /// <param name="script">The script.</param>
         /// <param name="scriptpathtype">The scriptpathtype.</param>
         /// <param name="scripttype">The scripttype.</param>
         /// <param name="arguments">The arguments.</param>
-        /// <summary>
         public ConfigButton(Guid id, string text, string description, string script, string scriptpathtype, string scripttype, List<ConfigArgument> arguments)
         {
-            this._id = id.Equals(Guid.Empty) ? Guid.NewGuid() : id;
-            this._text = text;
-            this._description = description;
-            this._script = script;
-            this._scriptpathtype = scriptpathtype;
-            this._scripttype = scripttype;
-            this._arguments = arguments;
+            Id = id.Equals(Guid.Empty) ? Guid.NewGuid() : id;
+            Text = text;
+            Description = description;
+            Script = script;
+            ScriptPathType = scriptpathtype;
+            ScriptType = scripttype;
+            Arguments = arguments;
         }
+
+        /// <summary>
+        /// Gets or sets the arguments.
+        /// </summary>
+        /// <value>
+        /// The arguments.
+        /// </value>
+        public List<ConfigArgument> Arguments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>
+        /// The description.
+        /// </value>
+        public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier.
@@ -40,7 +48,31 @@ namespace EasyJob.Serialization
         /// <value>
         /// The identifier.
         /// </value>
-        public Guid Id { get => _id; set => _id = value; }
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the script.
+        /// </summary>
+        /// <value>
+        /// The script.
+        /// </value>
+        public string Script { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the script path.
+        /// </summary>
+        /// <value>
+        /// The type of the script path.
+        /// </value>
+        public string ScriptPathType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the script.
+        /// </summary>
+        /// <value>
+        /// The type of the script.
+        /// </value>
+        public string ScriptType { get; set; }
 
         /// <summary>
         /// Gets or sets the text.
@@ -48,46 +80,6 @@ namespace EasyJob.Serialization
         /// <value>
         /// The text.
         /// </value>
-        public string Text { get => _text; set => _text = value; }
-        
-        /// <summary>
-        /// Gets or sets the description.
-        /// </summary>
-        /// <value>
-        /// The description.
-        /// </value>
-        public string Description { get => _description; set => _description = value; }
-        
-        /// <summary>
-        /// Gets or sets the script.
-        /// </summary>
-        /// <value>
-        /// The script.
-        /// </value>
-        public string Script { get => _script; set => _script = value; }
-        
-        /// <summary>
-        /// Gets or sets the type of the script path.
-        /// </summary>
-        /// <value>
-        /// The type of the script path.
-        /// </value>
-        public string ScriptPathType { get => _scriptpathtype; set => _scriptpathtype = value; }
-        
-        /// <summary>
-        /// Gets or sets the type of the script.
-        /// </summary>
-        /// <value>
-        /// The type of the script.
-        /// </value>
-        public string ScriptType { get => _scripttype; set => _scripttype = value; }
-        
-        /// <summary>
-        /// Gets or sets the arguments.
-        /// </summary>
-        /// <value>
-        /// The arguments.
-        /// </value>
-        public List<ConfigArgument> Arguments { get => _arguments; set => _arguments = value; }
+        public string Text { get; set; }
     }
 }

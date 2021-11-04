@@ -1,35 +1,32 @@
-﻿using EasyJob.Serialization;
-using EasyJob.Serialization.AnswerDialog;
-using EasyJob.TabItems;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using EasyJob.Serialization;
+using EasyJob.Serialization.AnswerDialog;
+using EasyJob.TabItems;
+using Newtonsoft.Json;
 
 namespace EasyJob.Utils
 {
-    public class ConfigUtils
+    public static class ConfigUtils
     {
-        public static string ConfigJsonPath = AppDomain.CurrentDomain.BaseDirectory + "config.json";
+        public static string ConfigJsonPath = AppContext.BaseDirectory + "config.json";
 
-
-        public static ObservableCollection<TabData> ConvertTabsFromConfigToUI(Config config)
+        public static ObservableCollection<TabData> ConvertTabsFromConfigToUi(Config config)
         {
-            ObservableCollection<TabData> tabs = new ObservableCollection<TabData>();
+            var tabs = new ObservableCollection<TabData>();
 
-            foreach (ConfigTab configTab in config.tabs)
+            foreach (var configTab in config.tabs)
             {
-                List<ActionButton> actionButtons = new List<ActionButton>();
+                var actionButtons = new List<ActionButton>();
 
-                foreach (ConfigButton configButton in configTab.Buttons)
+                foreach (var configButton in configTab.Buttons)
                 {
-                    List<Answer> configArguments = new List<Answer>();
-                    foreach (ConfigArgument configArgument in configButton.Arguments)
+                    var configArguments = new List<Answer>();
+                    foreach (var configArgument in configButton.Arguments)
                     {
                         configArguments.Add(new Answer { AnswerQuestion = configArgument.ArgumentQuestion, AnswerResult = configArgument.ArgumentAnswer });
                     }
@@ -47,20 +44,17 @@ namespace EasyJob.Utils
         /// Saves the configs.
         /// </summary>
         /// <param name="tabs">The tabs.</param>
-        /// <returns></returns>
-        public static List<ConfigTab> ConvertTabsFromUIToConfig(IEnumerable<TabData> tabs)
+        public static List<ConfigTab> ConvertTabsFromUiToConfig(IEnumerable<TabData> tabs)
         {
-            List<ConfigTab> configTabs = new List<ConfigTab>();
-            List<ConfigButton> buttons = null;
-            List<ConfigArgument> configArguments = null;
+            var configTabs = new List<ConfigTab>();
 
-            foreach (TabData tab in tabs)
+            foreach (var tab in tabs)
             {
-                buttons = new List<ConfigButton>();
-                foreach (ActionButton button in tab.TabActionButtons)
+                var buttons = new List<ConfigButton>();
+                foreach (var button in tab.TabActionButtons)
                 {
-                    configArguments = new List<ConfigArgument>();
-                    foreach (Answer answer in button.ButtonArguments)
+                    var configArguments = new List<ConfigArgument>();
+                    foreach (var answer in button.ButtonArguments)
                     {
                         configArguments.Add(new ConfigArgument(answer.AnswerQuestion, answer.AnswerResult));
                     }
@@ -78,8 +72,8 @@ namespace EasyJob.Utils
         {
             try
             {
-                string confifJson = JsonConvert.SerializeObject(config);
-                File.WriteAllText(ConfigJsonPath, confifJson, Encoding.UTF8);
+                var configJson = JsonConvert.SerializeObject(config);
+                File.WriteAllText(ConfigJsonPath, configJson, Encoding.UTF8);
 
                 return true;
             }

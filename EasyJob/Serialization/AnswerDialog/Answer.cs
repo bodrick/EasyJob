@@ -1,4 +1,4 @@
-﻿namespace EasyJob.Serialization.AnswerDialog
+namespace EasyJob.Serialization.AnswerDialog
 {
     public class Answer
     {

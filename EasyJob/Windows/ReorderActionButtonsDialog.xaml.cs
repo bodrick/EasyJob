@@ -1,22 +1,11 @@
-﻿using EasyJob.Serialization;
-using EasyJob.TabItems;
-using EasyJob.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using EasyJob.Serialization;
+using EasyJob.TabItems;
+using EasyJob.Utils;
 
 namespace EasyJob.Windows
 {
@@ -25,11 +14,11 @@ namespace EasyJob.Windows
     /// </summary>
     public partial class ReorderActionButtonsDialog : Window
     {
+        public bool changesOccured = false;
         public Config config;
         public int currentTabIndex = 0;
-        public bool changesOccured = false;
-        ObservableCollection<TabData> TabItems = null;
-        ObservableCollection<ActionButton> ActionButtons = null;
+        private ObservableCollection<ActionButton> ActionButtons = null;
+        private ObservableCollection<TabData> TabItems = null;
 
         public ReorderActionButtonsDialog(int _currentTabIndex, Config _config)
         {
@@ -45,13 +34,13 @@ namespace EasyJob.Windows
             {
                 MainWindowActionButtonsList.ItemsSource = null;
 
-                TabItems = ConfigUtils.ConvertTabsFromConfigToUI(config);
+                TabItems = ConfigUtils.ConvertTabsFromConfigToUi(config);
 
-                List<ActionButton> list = TabItems[currentTabIndex].TabActionButtons;
-                ObservableCollection<ActionButton> collection = new ObservableCollection<ActionButton>(list);
+                var list = TabItems[currentTabIndex].TabActionButtons;
+                var collection = new ObservableCollection<ActionButton>(list);
 
                 ActionButtons = collection;
-                
+
                 MainWindowActionButtonsList.ItemsSource = ActionButtons;
             }
             catch (Exception ex)
@@ -67,7 +56,7 @@ namespace EasyJob.Windows
                 try
                 {
                     config.tabs.Clear();
-                    config.tabs = ConfigUtils.ConvertTabsFromUIToConfig(TabItems);
+                    config.tabs = ConfigUtils.ConvertTabsFromUiToConfig(TabItems);
 
                     if (ConfigUtils.SaveFromConfigToFile(config) == true)
                     {
@@ -100,7 +89,7 @@ namespace EasyJob.Windows
             }
 
             var selectedIndex = MainWindowActionButtonsList.SelectedIndex;
-            
+
             if (selectedIndex + 1 < ActionButtons.Count)
             {
                 var itemToMoveDown = ActionButtons[selectedIndex];
@@ -108,7 +97,7 @@ namespace EasyJob.Windows
                 ActionButtons.Insert(selectedIndex + 1, itemToMoveDown);
                 MainWindowActionButtonsList.SelectedIndex = selectedIndex + 1;
 
-                List<ActionButton> myList = new List<ActionButton>(ActionButtons);
+                var myList = new List<ActionButton>(ActionButtons);
                 TabItems[currentTabIndex].TabActionButtons = myList;
             }
 
@@ -133,7 +122,7 @@ namespace EasyJob.Windows
                 ActionButtons.RemoveAt(selectedIndex);
                 ActionButtons.Insert(selectedIndex - 1, itemToMoveUp);
                 MainWindowActionButtonsList.SelectedIndex = selectedIndex - 1;
-                List<ActionButton> myList = new List<ActionButton>(ActionButtons);
+                var myList = new List<ActionButton>(ActionButtons);
                 TabItems[currentTabIndex].TabActionButtons = myList;
             }
 

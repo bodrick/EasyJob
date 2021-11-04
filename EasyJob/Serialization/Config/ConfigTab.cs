@@ -1,14 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EasyJob.Serialization
 {
     public class ConfigTab
     {
-        private Guid _id;
-        private string _header;
-        private List<ConfigButton> _buttons;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigTab"/> class.
         /// </summary>
@@ -17,19 +13,18 @@ namespace EasyJob.Serialization
         /// <param name="buttons">The buttons.</param>
         public ConfigTab(Guid id, string header, List<ConfigButton> buttons)
         {
-            this._id = id.Equals(Guid.Empty) ? Guid.NewGuid() : id;
-            this._header = header;
-            this._buttons = buttons;
+            ID = id.Equals(Guid.Empty) ? Guid.NewGuid() : id;
+            Header = header;
+            Buttons = buttons;
         }
 
         /// <summary>
-        /// Gets or sets the identifier.
+        /// Gets or sets the buttons.
         /// </summary>
         /// <value>
-        /// The identifier.
+        /// The buttons.
         /// </value>
-        public Guid ID { get => _id; set => _id = value; }
-
+        public List<ConfigButton> Buttons { get; set; }
 
         /// <summary>
         /// Gets or sets the header.
@@ -37,13 +32,14 @@ namespace EasyJob.Serialization
         /// <value>
         /// The header.
         /// </value>
-        public string Header { get => _header; set => _header = value; }
+        public string Header { get; set; }
+
         /// <summary>
-        /// Gets or sets the buttons.
+        /// Gets or sets the identifier.
         /// </summary>
         /// <value>
-        /// The buttons.
+        /// The identifier.
         /// </value>
-        public List<ConfigButton> Buttons { get => _buttons; set => _buttons = value; }
+        public Guid ID { get; set; }
     }
 }

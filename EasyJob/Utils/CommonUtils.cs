@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,40 +9,11 @@ namespace EasyJob.Utils
 {
     public class CommonUtils
     {
-        public static void OpenLinkInBrowser(string url)
-        {
-            try
-            {
-                Process proc = new Process();
-                proc.StartInfo.UseShellExecute = true;
-                proc.StartInfo.FileName = url;
-                proc.Start();
-            }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
-        }
-
-        public static string ReadAssemblyFile(string name)
-        {
-            // Determine path
-            var assembly = Assembly.GetExecutingAssembly();
-            string resourcePath = name;
-            // Format: "{Namespace}.{Folder}.{filename}.{Extension}"
-            if (!name.StartsWith(nameof(EasyJob)))
-            {
-                resourcePath = assembly.GetManifestResourceNames()
-                    .Single(str => str.EndsWith(name));
-            }
-
-            using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
-        }
+        public static string ApplicationStartupPath() => AppDomain.CurrentDomain.BaseDirectory;
 
         public static string ApplyConsoleColorTagsToText(string Text)
         {
-            string[][] colorCodes = new string[][] { 
+            var colorCodes = new string[][] {
                 new string[] { @"\c01EJ", "/c01EJ", "<span style=\"color: #DFFF00;\">" },
                 new string[] { @"\c02EJ", "/c02EJ", "<span style=\"color: #FFBF00;\">" },
                 new string[] { @"\c03EJ", "/c03EJ", "<span style=\"color: #FF7F50;\">" },
@@ -59,12 +30,12 @@ namespace EasyJob.Utils
                 new string[] { @"\c14EJ", "/c14EJ", "<span style=\"color: #2A7B9B;\">" }
             };
 
-            for (int i = 0; i <= colorCodes.GetLength(0) - 1; i++)
+            for (var i = 0; i <= colorCodes.GetLength(0) - 1; i++)
             {
-                if (Text.Contains(colorCodes[i][0]) == true && Text.Contains(colorCodes[i][1]) == false)
+                if (Text.Contains(colorCodes[i][0]) && !Text.Contains(colorCodes[i][1]))
                 {
                     Text = Text.Replace(colorCodes[i][0], colorCodes[i][2]);
-                    Text = Text + "</span>";
+                    Text += "</span>";
                 }
                 else if (Text.Contains(colorCodes[i][0]) == false && Text.Contains(colorCodes[i][1]) == true)
                 {
@@ -80,15 +51,35 @@ namespace EasyJob.Utils
             return Text;
         }
 
-        public static string ConvertPartToRelative(string Path)
+        public static string ConvertPartToRelative(string Path) => Path.Replace(AppDomain.CurrentDomain.BaseDirectory, "");
+
+        public static void OpenLinkInBrowser(string url)
         {
-            Path = Path.Replace(AppDomain.CurrentDomain.BaseDirectory, "");
-            return Path;
+            try
+            {
+                var proc = new Process();
+                proc.StartInfo.UseShellExecute = true;
+                proc.StartInfo.FileName = url;
+                proc.Start();
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        public static string ApplicationStartupPath()
+        public static string ReadAssemblyFile(string name)
         {
-            return AppDomain.CurrentDomain.BaseDirectory;
+            // Determine path
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourcePath = name;
+            // Format: "{Namespace}.{Folder}.{filename}.{Extension}"
+            if (!name.StartsWith(nameof(EasyJob)))
+            {
+                resourcePath = assembly.GetManifestResourceNames()
+                    .Single(str => str.EndsWith(name));
+            }
+
+            using var stream = assembly.GetManifestResourceStream(resourcePath);
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

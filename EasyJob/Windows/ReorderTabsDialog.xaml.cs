@@ -1,12 +1,10 @@
-﻿using EasyJob.Serialization;
-using EasyJob.TabItems;
-using EasyJob.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 using System.Windows;
+using EasyJob.Serialization;
+using EasyJob.TabItems;
+using EasyJob.Utils;
 
 namespace EasyJob.Windows
 {
@@ -15,9 +13,9 @@ namespace EasyJob.Windows
     /// </summary>
     public partial class ReorderTabsDialog : Window
     {
-        public Config config;
-        ObservableCollection<TabData> TabItems = null;
         public bool changesOccured = false;
+        public Config config;
+        private ObservableCollection<TabData> TabItems = null;
 
         public ReorderTabsDialog(Config _config)
         {
@@ -31,7 +29,7 @@ namespace EasyJob.Windows
             try
             {
                 MainWindowTabsList.ItemsSource = null;
-                TabItems = ConfigUtils.ConvertTabsFromConfigToUI(config);
+                TabItems = ConfigUtils.ConvertTabsFromConfigToUi(config);
                 MainWindowTabsList.ItemsSource = TabItems;
             }
             catch (Exception ex)
@@ -47,15 +45,15 @@ namespace EasyJob.Windows
                 try
                 {
                     config.tabs.Clear();
-                    config.tabs = ConfigUtils.ConvertTabsFromUIToConfig(TabItems);
+                    config.tabs = ConfigUtils.ConvertTabsFromUiToConfig(TabItems);
 
                     if (ConfigUtils.SaveFromConfigToFile(config) == true)
                     {
                         return true;
                     }
-                    else 
-                    { 
-                        return false; 
+                    else
+                    {
+                        return false;
                     }
                 }
                 catch
@@ -73,7 +71,7 @@ namespace EasyJob.Windows
 
         private void TabsRedorderDown_Click(object sender, RoutedEventArgs e)
         {
-            if(MainWindowTabsList.SelectedIndex == -1)
+            if (MainWindowTabsList.SelectedIndex == -1)
             {
                 MessageBox.Show("Please select item to reorder");
                 return;

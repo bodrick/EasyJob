@@ -1,22 +1,11 @@
-﻿using EasyJob.Serialization;
+using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using EasyJob.Serialization;
 using EasyJob.TabItems;
 using EasyJob.Utils;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace EasyJob.Windows
 {
@@ -25,9 +14,9 @@ namespace EasyJob.Windows
     /// </summary>
     public partial class NewTabDialog : Window
     {
-        public string configJson = "";
         public Config config;
-        ObservableCollection<TabData> TabItems = null;
+        public string configJson = "";
+        private ObservableCollection<TabData> TabItems = null;
 
         public NewTabDialog()
         {
@@ -44,7 +33,7 @@ namespace EasyJob.Windows
                     configJson = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "config.json");
                     config = JsonConvert.DeserializeObject<Config>(configJson);
 
-                    TabItems = ConfigUtils.ConvertTabsFromConfigToUI(config);
+                    TabItems = ConfigUtils.ConvertTabsFromConfigToUi(config);
                 }
                 catch (Exception ex)
                 {
@@ -59,13 +48,13 @@ namespace EasyJob.Windows
 
         public bool SaveConfig()
         {
-            string path = AppDomain.CurrentDomain.BaseDirectory + "config.json";
+            var path = AppDomain.CurrentDomain.BaseDirectory + "config.json";
             if (File.Exists(path))
             {
                 try
                 {
                     config.tabs.Clear();
-                    config.tabs = ConfigUtils.ConvertTabsFromUIToConfig(TabItems);
+                    config.tabs = ConfigUtils.ConvertTabsFromUiToConfig(TabItems);
 
                     if (ConfigUtils.SaveFromConfigToFile(config) == true)
                     {
@@ -89,11 +78,13 @@ namespace EasyJob.Windows
             return false;
         }
 
+        private void CancelButton_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
         private void CreateNewTabButton_Click(object sender, RoutedEventArgs e)
         {
             if (!string.IsNullOrEmpty(CreateNewTabTextBox.Text))
             {
-                TabData tabData = new TabData(CreateNewTabTextBox.Text);
+                var tabData = new TabData(CreateNewTabTextBox.Text);
                 TabItems.Add(tabData);
 
                 if (SaveConfig())
@@ -109,10 +100,6 @@ namespace EasyJob.Windows
             {
                 MessageBox.Show("Tab header name should not be empty.");
             }
-        }
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
         }
     }
 }

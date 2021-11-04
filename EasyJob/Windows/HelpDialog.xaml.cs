@@ -1,21 +1,8 @@
-﻿using EasyJob.Utils;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Xml;
-using System.Xml.Linq;
+using EasyJob.Utils;
 
 namespace EasyJob.Windows
 {
@@ -26,16 +13,16 @@ namespace EasyJob.Windows
     {
         public HelpDialog(string helpitem)
         {
-            InitializeComponent(); 
+            InitializeComponent();
             LoadXml(helpitem);
         }
 
         private void LoadXml(string helpitem)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml(CommonUtils.ReadAssemblyFile(@"EasyJob.Documentation.HelpDocumentation.xml"));
 
-            XmlNodeList nodeList = doc.SelectNodes("/items/item[name='" + helpitem + "']");
+            var nodeList = doc.SelectNodes("/items/item[name='" + helpitem + "']");
 
             HelpHeading.Text = nodeList[0]["heading"].InnerText;
             HelpUsed.Text = nodeList[0]["used"].InnerText;
@@ -53,20 +40,14 @@ namespace EasyJob.Windows
             catch { }
         }
 
+        private void PlayVideoButton_Click(object sender, RoutedEventArgs e) => HelpVideo.Play();
+
         private void ReloadVideoButton_Click(object sender, RoutedEventArgs e)
         {
             HelpVideo.Position = TimeSpan.FromSeconds(0);
             HelpVideo.Play();
         }
 
-        private void StopVideoButton_Click(object sender, RoutedEventArgs e)
-        {
-            HelpVideo.Stop();
-        }
-
-        private void PlayVideoButton_Click(object sender, RoutedEventArgs e)
-        {
-            HelpVideo.Play();
-        }
+        private void StopVideoButton_Click(object sender, RoutedEventArgs e) => HelpVideo.Stop();
     }
 }

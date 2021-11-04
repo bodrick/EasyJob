@@ -9,9 +9,8 @@
 //---------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Diagnostics;
-using System.Collections;
+using System.IO;
 using System.Text;
 
 namespace WpfRichText
@@ -50,7 +49,7 @@ namespace WpfRichText
             _nextToken = new StringBuilder(100);
             _nextTokenType = HtmlTokenType.Text;
             // read the first character so we have some value for the NextCharacter property
-            this.GetNextCharacter();
+            GetNextCharacter();
         }
 
         #endregion Constructors
@@ -74,23 +73,23 @@ namespace WpfRichText
         {
             Debug.Assert(_nextTokenType != HtmlTokenType.EOF);
             _nextToken.Length = 0;
-            if (this.IsAtEndOfStream)
+            if (IsAtEndOfStream)
             {
                 _nextTokenType = HtmlTokenType.EOF;
                 return;
             }
 
-            if (this.IsAtTagStart)
+            if (IsAtTagStart)
             {
-                this.GetNextCharacter();
+                GetNextCharacter();
 
-                if (this.NextCharacter == '/')
+                if (NextCharacter == '/')
                 {
                     _nextToken.Append("</");
                     _nextTokenType = HtmlTokenType.ClosingTagStart;
 
                     // advance
-                    this.GetNextCharacter();
+                    GetNextCharacter();
                     _ignoreNextWhitespace = false; // Whitespaces after closing tags are significant
                 }
                 else
@@ -100,40 +99,40 @@ namespace WpfRichText
                     _ignoreNextWhitespace = true; // Whitespaces after opening tags are insignificant
                 }
             }
-            else if (this.IsAtDirectiveStart)
+            else if (IsAtDirectiveStart)
             {
                 // either a comment or CDATA
-                this.GetNextCharacter();
+                GetNextCharacter();
                 if (_lookAheadCharacter == '[')
                 {
                     // cdata
-                    this.ReadDynamicContent();
+                    ReadDynamicContent();
                 }
                 else if (_lookAheadCharacter == '-')
                 {
-                    this.ReadComment();
+                    ReadComment();
                 }
                 else
                 {
                     // neither a comment nor cdata, should be something like DOCTYPE
                     // skip till the next tag ender
-                    this.ReadUnknownDirective();
+                    ReadUnknownDirective();
                 }
             }
             else
             {
                 // read text content, unless you encounter a tag
                 _nextTokenType = HtmlTokenType.Text;
-                while (!this.IsAtTagStart && !this.IsAtEndOfStream && !this.IsAtDirectiveStart)
+                while (!IsAtTagStart && !IsAtEndOfStream && !IsAtDirectiveStart)
                 {
-                    if (this.NextCharacter == '<' && !this.IsNextCharacterEntity && _lookAheadCharacter == '?')
+                    if (NextCharacter == '<' && !IsNextCharacterEntity && _lookAheadCharacter == '?')
                     {
                         // ignore processing directive
-                        this.SkipProcessingDirective();
+                        SkipProcessingDirective();
                     }
                     else
                     {
-                        if (this.NextCharacter <= ' ')
+                        if (NextCharacter <= ' ')
                         {
                             //  Respect xml:preserve or its equivalents for whitespace processing
                             if (_ignoreNextWhitespace)
@@ -151,10 +150,10 @@ namespace WpfRichText
                         }
                         else
                         {
-                            _nextToken.Append(this.NextCharacter);
+                            _nextToken.Append(NextCharacter);
                             _ignoreNextWhitespace = false;
                         }
-                        this.GetNextCharacter();
+                        GetNextCharacter();
                     }
                 }
             }
@@ -167,32 +166,32 @@ namespace WpfRichText
         internal void GetNextTagToken()
         {
             _nextToken.Length = 0;
-            if (this.IsAtEndOfStream)
+            if (IsAtEndOfStream)
             {
                 _nextTokenType = HtmlTokenType.EOF;
                 return;
             }
 
-            this.SkipWhiteSpace();
+            SkipWhiteSpace();
 
-            if (this.NextCharacter == '>' && !this.IsNextCharacterEntity)
+            if (NextCharacter == '>' && !IsNextCharacterEntity)
             {
                 // &gt; should not end a tag, so make sure it's not an entity
                 _nextTokenType = HtmlTokenType.TagEnd;
                 _nextToken.Append('>');
-                this.GetNextCharacter();
+                GetNextCharacter();
                 // Note: _ignoreNextWhitespace must be set appropriately on tag start processing
             }
-            else if (this.NextCharacter == '/' && _lookAheadCharacter == '>')
+            else if (NextCharacter == '/' && _lookAheadCharacter == '>')
             {
                 // could be start of closing of empty tag
                 _nextTokenType = HtmlTokenType.EmptyTagEnd;
                 _nextToken.Append("/>");
-                this.GetNextCharacter();
-                this.GetNextCharacter();
+                GetNextCharacter();
+                GetNextCharacter();
                 _ignoreNextWhitespace = false; // Whitespace after no-scope tags are sifnificant
             }
-            else if (IsGoodForNameStart(this.NextCharacter))
+            else if (IsGoodForNameStart(NextCharacter))
             {
                 _nextTokenType = HtmlTokenType.Name;
 
@@ -202,18 +201,18 @@ namespace WpfRichText
                 // just stop and return whatever is in the token
                 // if the parser is not expecting end of file after this it will call
                 // the get next token function and throw an exception
-                while (IsGoodForName(this.NextCharacter) && !this.IsAtEndOfStream)
+                while (IsGoodForName(NextCharacter) && !IsAtEndOfStream)
                 {
-                    _nextToken.Append(this.NextCharacter);
-                    this.GetNextCharacter();
+                    _nextToken.Append(NextCharacter);
+                    GetNextCharacter();
                 }
             }
             else
             {
                 // Unexpected type of token for a tag. Reprot one character as Atom, expecting that HtmlParser will ignore it.
                 _nextTokenType = HtmlTokenType.Atom;
-                _nextToken.Append(this.NextCharacter);
-                this.GetNextCharacter();
+                _nextToken.Append(NextCharacter);
+                GetNextCharacter();
             }
         }
 
@@ -230,12 +229,12 @@ namespace WpfRichText
             _nextToken.Append('=');
             _nextTokenType = HtmlTokenType.EqualSign;
 
-            this.SkipWhiteSpace();
+            SkipWhiteSpace();
 
-            if (this.NextCharacter == '=')
+            if (NextCharacter == '=')
             {
                 // '=' is not in the list of entities, so no need to check for entities here
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
         }
 
@@ -249,24 +248,24 @@ namespace WpfRichText
             Debug.Assert(_nextTokenType != HtmlTokenType.EOF);
             _nextToken.Length = 0;
 
-            this.SkipWhiteSpace();
+            SkipWhiteSpace();
 
             _nextTokenType = HtmlTokenType.Atom;
 
-            if ((this.NextCharacter == '\'' || this.NextCharacter == '"') && !this.IsNextCharacterEntity)
+            if ((NextCharacter == '\'' || NextCharacter == '"') && !IsNextCharacterEntity)
             {
-                char startingQuote = this.NextCharacter;
-                this.GetNextCharacter();
+                var startingQuote = NextCharacter;
+                GetNextCharacter();
 
                 // Consume all characters between quotes
-                while (!(this.NextCharacter == startingQuote && !this.IsNextCharacterEntity) && !this.IsAtEndOfStream)
+                while (!(NextCharacter == startingQuote && !IsNextCharacterEntity) && !IsAtEndOfStream)
                 {
-                    _nextToken.Append(this.NextCharacter);
-                    this.GetNextCharacter();
+                    _nextToken.Append(NextCharacter);
+                    GetNextCharacter();
                 }
-                if (this.NextCharacter == startingQuote)
+                if (NextCharacter == startingQuote)
                 {
-                    this.GetNextCharacter();
+                    GetNextCharacter();
                 }
 
                 // complete the quoted value
@@ -281,10 +280,10 @@ namespace WpfRichText
             }
             else
             {
-                while (!this.IsAtEndOfStream && !Char.IsWhiteSpace(this.NextCharacter) && this.NextCharacter != '>')
+                while (!IsAtEndOfStream && !char.IsWhiteSpace(NextCharacter) && NextCharacter != '>')
                 {
-                    _nextToken.Append(this.NextCharacter);
-                    this.GetNextCharacter();
+                    _nextToken.Append(NextCharacter);
+                    GetNextCharacter();
                 }
             }
         }
@@ -299,21 +298,9 @@ namespace WpfRichText
 
         #region Internal Properties
 
-        internal HtmlTokenType NextTokenType
-        {
-            get
-            {
-                return _nextTokenType;
-            }
-        }
+        internal HtmlTokenType NextTokenType => _nextTokenType;
 
-        internal string NextToken
-        {
-            get
-            {
-                return _nextToken.ToString();
-            }
-        }
+        internal string NextToken => _nextToken.ToString();
 
         #endregion Internal Properties
 
@@ -348,7 +335,7 @@ namespace WpfRichText
             // next character not an entity as of now
             _isNextCharacterEntity = false;
 
-            this.ReadLookAheadCharacter();
+            ReadLookAheadCharacter();
 
             if (_nextCharacter == '&')
             {
@@ -357,18 +344,18 @@ namespace WpfRichText
                     // numeric entity - parse digits - &#DDDDD;
                     int entityCode;
                     entityCode = 0;
-                    this.ReadLookAheadCharacter();
+                    ReadLookAheadCharacter();
 
                     // largest numeric entity is 7 characters
-                    for (int i = 0; i < 7 && Char.IsDigit(_lookAheadCharacter); i++)
+                    for (var i = 0; i < 7 && char.IsDigit(_lookAheadCharacter); i++)
                     {
-                        entityCode = 10 * entityCode + (_lookAheadCharacterCode - (int)'0');
-                        this.ReadLookAheadCharacter();
+                        entityCode = 10 * entityCode + (_lookAheadCharacterCode - '0');
+                        ReadLookAheadCharacter();
                     }
                     if (_lookAheadCharacter == ';')
                     {
                         // correct format - advance
-                        this.ReadLookAheadCharacter();
+                        ReadLookAheadCharacter();
                         _nextCharacterCode = entityCode;
 
                         // if this is out of range it will set the character to '?'
@@ -383,30 +370,30 @@ namespace WpfRichText
                         // we would have eaten up some digits
                         _nextCharacter = _lookAheadCharacter;
                         _nextCharacterCode = _lookAheadCharacterCode;
-                        this.ReadLookAheadCharacter();
+                        ReadLookAheadCharacter();
                         _isNextCharacterEntity = false;
                     }
                 }
-                else if (Char.IsLetter(_lookAheadCharacter))
+                else if (char.IsLetter(_lookAheadCharacter))
                 {
                     // entity is written as a string
-                    string entity = "";
+                    var entity = "";
 
                     // maximum length of string entities is 10 characters
-                    for (int i = 0; i < 10 && (Char.IsLetter(_lookAheadCharacter) || Char.IsDigit(_lookAheadCharacter)); i++)
+                    for (var i = 0; i < 10 && (char.IsLetter(_lookAheadCharacter) || char.IsDigit(_lookAheadCharacter)); i++)
                     {
                         entity += _lookAheadCharacter;
-                        this.ReadLookAheadCharacter();
+                        ReadLookAheadCharacter();
                     }
                     if (_lookAheadCharacter == ';')
                     {
                         // advance
-                        this.ReadLookAheadCharacter();
+                        ReadLookAheadCharacter();
 
                         if (HtmlSchema.IsEntity(entity))
                         {
                             _nextCharacter = HtmlSchema.EntityCharacterValue(entity);
-                            _nextCharacterCode = (int)_nextCharacter;
+                            _nextCharacterCode = _nextCharacter;
                             _isNextCharacterEntity = true;
                         }
                         else
@@ -415,7 +402,7 @@ namespace WpfRichText
                             // move on to the next character
                             _nextCharacter = _lookAheadCharacter;
                             _nextCharacterCode = _lookAheadCharacterCode;
-                            this.ReadLookAheadCharacter();
+                            ReadLookAheadCharacter();
 
                             // not an entity
                             _isNextCharacterEntity = false;
@@ -426,7 +413,7 @@ namespace WpfRichText
                         // skip whatever we read after the ampersand
                         // set next character and move on
                         _nextCharacter = _lookAheadCharacter;
-                        this.ReadLookAheadCharacter();
+                        ReadLookAheadCharacter();
                         _isNextCharacterEntity = false;
                     }
                 }
@@ -435,8 +422,8 @@ namespace WpfRichText
 
         private void ReadLookAheadCharacter()
         {
-			_lookAheadCharacterCode = _inputStringReader.Read();
-			if (_lookAheadCharacterCode != -1)
+            _lookAheadCharacterCode = _inputStringReader.Read();
+            if (_lookAheadCharacterCode != -1)
             {
                 _lookAheadCharacter = (char)_lookAheadCharacterCode;
             }
@@ -455,41 +442,41 @@ namespace WpfRichText
             {
                 if (_nextCharacter == '<' && (_lookAheadCharacter == '?' || _lookAheadCharacter == '!'))
                 {
-                    this.GetNextCharacter();
+                    GetNextCharacter();
 
                     if (_lookAheadCharacter == '[')
                     {
                         // Skip CDATA block and DTDs(?)
-                        while (!this.IsAtEndOfStream && !(_previousCharacter == ']' && _nextCharacter == ']' && _lookAheadCharacter == '>'))
+                        while (!IsAtEndOfStream && !(_previousCharacter == ']' && _nextCharacter == ']' && _lookAheadCharacter == '>'))
                         {
-                            this.GetNextCharacter();
+                            GetNextCharacter();
                         }
                         if (_nextCharacter == '>')
                         {
-                            this.GetNextCharacter();
+                            GetNextCharacter();
                         }
                     }
                     else
                     {
                         // Skip processing instruction, comments
-                        while (!this.IsAtEndOfStream && _nextCharacter != '>')
+                        while (!IsAtEndOfStream && _nextCharacter != '>')
                         {
-                            this.GetNextCharacter();
+                            GetNextCharacter();
                         }
                         if (_nextCharacter == '>')
                         {
-                            this.GetNextCharacter();
+                            GetNextCharacter();
                         }
                     }
                 }
 
 
-                if (!Char.IsWhiteSpace(this.NextCharacter))
+                if (!char.IsWhiteSpace(NextCharacter))
                 {
                     break;
                 }
 
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
         }
 
@@ -504,10 +491,7 @@ namespace WpfRichText
         /// true if the character can be the first character in a name
         /// false otherwise
         /// </returns>
-        private static bool IsGoodForNameStart(char character)
-        {
-            return character == '_' || Char.IsLetter(character);
-        }
+        private static bool IsGoodForNameStart(char character) => character == '_' || char.IsLetter(character);
 
         /// <summary>
         /// checks if a character can be used as a non-starting character in a name
@@ -520,19 +504,16 @@ namespace WpfRichText
         /// <returns>
         /// true if the character can be a valid part of a name
         /// </returns>
-        private static bool IsGoodForName(char character)
-        {
+        private static bool IsGoodForName(char character) =>
             // we are not concerned with escaped characters in names
             // we assume that character entities are allowed as part of a name
-            return 
-                HtmlLexicalAnalyzer.IsGoodForNameStart(character) || 
-                character == '.' || 
-                character == '-' || 
+            HtmlLexicalAnalyzer.IsGoodForNameStart(character) ||
+                character == '.' ||
+                character == '-' ||
                 character == ':' ||
-                Char.IsDigit(character) || 
-                IsCombiningCharacter(character) || 
+                char.IsDigit(character) ||
+                IsCombiningCharacter(character) ||
                 IsExtender(character);
-        }
 
         /// <summary>
         /// identifies a character as being a combining character, permitted in a name
@@ -545,11 +526,9 @@ namespace WpfRichText
         /// <returns>
         /// true if the character is a combining character, false otherwise
         /// </returns>
-        private static bool IsCombiningCharacter(char character)
-        {
+        private static bool IsCombiningCharacter(char character) =>
             // TODO: put actual code with checks against all combining characters here
-            return false;
-        }
+            false;
 
         /// <summary>
         /// identifies a character as being an extender, permitted in a name
@@ -562,11 +541,9 @@ namespace WpfRichText
         /// <returns>
         /// true if the character is an extender, false otherwise
         /// </returns>
-        private static bool IsExtender(char character)
-        {
+        private static bool IsExtender(char character) =>
             // TODO: put actual code with checks against all extenders here
-            return false;
-        }
+            false;
 
         /// <summary>
         /// skips dynamic content starting with  ![ and ending with ]
@@ -581,28 +558,28 @@ namespace WpfRichText
             _nextToken.Length = 0;
 
             // advance twice, once to get the lookahead character and then to reach the start of the cdata
-            this.GetNextCharacter();
-            this.GetNextCharacter();
-            
+            GetNextCharacter();
+            GetNextCharacter();
+
             // NOTE: 10/12/2004: modified this function to check when called if's reading CDATA or something else
             // some directives may start with a <![ and then have some data and they will just end with a ]>
             // this function is modified to stop at the sequence ]> and not ]]>
             // this means that CDATA and anything else expressed in their own set of [] within the <! [...]>
             // directive cannot contain a ]> sequence. However it is doubtful that cdata could contain such
             // sequence anyway, it probably stops at the first ]
-            while (!(_nextCharacter == ']' && _lookAheadCharacter == '>') && !this.IsAtEndOfStream)
+            while (!(_nextCharacter == ']' && _lookAheadCharacter == '>') && !IsAtEndOfStream)
             {
                 // advance
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
 
-            if (!this.IsAtEndOfStream)
+            if (!IsAtEndOfStream)
             {
                 // advance, first to the last >
-                this.GetNextCharacter();
+                GetNextCharacter();
 
                 // then advance past it to the next character after processing directive
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
         }
 
@@ -622,26 +599,26 @@ namespace WpfRichText
             _nextToken.Length = 0;
 
             // advance to the next character, so that to be at the start of comment value
-            this.GetNextCharacter(); // get first '-'
-            this.GetNextCharacter(); // get second '-'
-            this.GetNextCharacter(); // get first character of comment content
- 
+            GetNextCharacter(); // get first '-'
+            GetNextCharacter(); // get second '-'
+            GetNextCharacter(); // get first character of comment content
+
             while (true)
             {
                 // Read text until end of comment
                 // Note that in many actual html pages comments end with "!>" (while xml standard is "-->")
-                while (!this.IsAtEndOfStream && !(_nextCharacter == '-' && _lookAheadCharacter == '-' || _nextCharacter == '!' && _lookAheadCharacter == '>'))
+                while (!IsAtEndOfStream && !(_nextCharacter == '-' && _lookAheadCharacter == '-' || _nextCharacter == '!' && _lookAheadCharacter == '>'))
                 {
-                    _nextToken.Append(this.NextCharacter);
-                    this.GetNextCharacter();
+                    _nextToken.Append(NextCharacter);
+                    GetNextCharacter();
                 }
 
                 // Finish comment reading
-                this.GetNextCharacter();
+                GetNextCharacter();
                 if (_previousCharacter == '-' && _nextCharacter == '-' && _lookAheadCharacter == '>')
                 {
                     // Standard comment end. Eat it and exit the loop
-                    this.GetNextCharacter(); // get '>'
+                    GetNextCharacter(); // get '>'
                     break;
                 }
                 else if (_previousCharacter == '!' && _nextCharacter == '>')
@@ -660,7 +637,7 @@ namespace WpfRichText
             // Read end of comment combination
             if (_nextCharacter == '>')
             {
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
         }
 
@@ -679,18 +656,18 @@ namespace WpfRichText
             _nextToken.Length = 0;
 
             // advance to the next character
-            this.GetNextCharacter();
+            GetNextCharacter();
 
             // skip to the first tag end we find
-            while (!(_nextCharacter == '>' && !IsNextCharacterEntity) && !this.IsAtEndOfStream)
+            while (!(_nextCharacter == '>' && !IsNextCharacterEntity) && !IsAtEndOfStream)
             {
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
 
-            if (!this.IsAtEndOfStream)
+            if (!IsAtEndOfStream)
             {
                 // advance past the tag end
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
         }
 
@@ -705,24 +682,24 @@ namespace WpfRichText
             Debug.Assert(_nextCharacter == '<' && _lookAheadCharacter == '?');
 
             // advance twice, once to get the lookahead character and then to reach the start of the drective
-            this.GetNextCharacter();
-            this.GetNextCharacter();
+            GetNextCharacter();
+            GetNextCharacter();
 
-            while (!((_nextCharacter == '?' || _nextCharacter == '/') && _lookAheadCharacter == '>') && !this.IsAtEndOfStream)
+            while (!((_nextCharacter == '?' || _nextCharacter == '/') && _lookAheadCharacter == '>') && !IsAtEndOfStream)
             {
                 // advance
                 // we don't need to check for entities here because '?' is not an entity
                 // and even though > is an entity there is no entity processing when reading lookahead character
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
 
-            if (!this.IsAtEndOfStream)
+            if (!IsAtEndOfStream)
             {
                 // advance, first to the last >
-                this.GetNextCharacter();
+                GetNextCharacter();
 
                 // then advance past it to the next character after processing directive
-                this.GetNextCharacter();
+                GetNextCharacter();
             }
         }
 
@@ -736,55 +713,17 @@ namespace WpfRichText
 
         #region Private Properties
 
-        private char NextCharacter
-        {
-            get
-            {
-                return _nextCharacter;
-            }
-        }
+        private char NextCharacter => _nextCharacter;
 
-        private bool IsAtEndOfStream
-        {
-            get
-            {
-                return _nextCharacterCode == -1;
-            }
-        }
+        private bool IsAtEndOfStream => _nextCharacterCode == -1;
 
-        private bool IsAtTagStart
-        {
-            get
-            {
-                return _nextCharacter == '<' && (_lookAheadCharacter == '/' || IsGoodForNameStart(_lookAheadCharacter)) && !_isNextCharacterEntity;
-            }
-        }
+        private bool IsAtTagStart => _nextCharacter == '<' && (_lookAheadCharacter == '/' || IsGoodForNameStart(_lookAheadCharacter)) && !_isNextCharacterEntity;
 
-        private bool IsAtTagEnd
-        {
-            // check if at end of empty tag or regular tag
-            get
-            {
-                return (_nextCharacter == '>' || (_nextCharacter == '/' && _lookAheadCharacter == '>')) && !_isNextCharacterEntity;
-            }
-        }
+        private bool IsAtTagEnd => (_nextCharacter == '>' || (_nextCharacter == '/' && _lookAheadCharacter == '>')) && !_isNextCharacterEntity;
 
-        private bool IsAtDirectiveStart
-        {
-            get
-            {
-                return (_nextCharacter == '<' && _lookAheadCharacter == '!' && !this.IsNextCharacterEntity);
-            }
-        }
+        private bool IsAtDirectiveStart => (_nextCharacter == '<' && _lookAheadCharacter == '!' && !IsNextCharacterEntity);
 
-        private bool IsNextCharacterEntity
-        {
-            // check if next character is an entity
-            get
-            {
-                return _isNextCharacterEntity;
-            }
-        }
+        private bool IsNextCharacterEntity => _isNextCharacterEntity;
 
         #endregion Private Properties
 
@@ -809,29 +748,26 @@ namespace WpfRichText
         private bool _isNextCharacterEntity;
 
         // store token and type in local variables before copying them to output parameters
-        StringBuilder _nextToken;
-        HtmlTokenType _nextTokenType;
+        private readonly StringBuilder _nextToken;
+        private HtmlTokenType _nextTokenType;
 
         #endregion Private Fields
 
-		private bool isDisposing = false;
-		public void Dispose()
-		{
-			Dispose(isDisposing);
-		}
+        private bool isDisposing = false;
+        public void Dispose() => Dispose(isDisposing);
 
-		private void Dispose(bool disposing)
-		{
-			if (!disposing)
-			{
-				isDisposing = true;
+        private void Dispose(bool disposing)
+        {
+            if (!disposing)
+            {
+                isDisposing = true;
 
-				if (this._inputStringReader != null)
-				{
-					this._inputStringReader.Dispose();
-					this._inputStringReader = null;
-				}
-			}
-		}
-	}
+                if (_inputStringReader != null)
+                {
+                    _inputStringReader.Dispose();
+                    _inputStringReader = null;
+                }
+            }
+        }
+    }
 }
